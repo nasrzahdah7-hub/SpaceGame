@@ -2,997 +2,671 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ملحمة حرب الفضاء السرمدية - الحرية الكاملة والموبايل</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ملحمة الفضاء: النسخة الاحترافية للموبايل</title>
     <style>
+        :root {
+            --primary: #a855f7;
+            --primary-glow: rgba(168, 85, 247, 0.6);
+            --secondary: #06b6d4;
+            --danger: #f43f5e;
+            --bg-dark: #05020c;
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background-color: #03000a;
+            background-color: var(--bg-dark);
             color: #fff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
             overflow: hidden;
             user-select: none;
             touch-action: none;
         }
 
-        #main-layout {
-            display: flex;
-            flex-direction: row-reverse;
-            gap: 15px;
-            align-items: flex-start;
-            max-width: 100vw;
-            padding: 10px;
-        }
-
-        /* لوحة التحكم والمراقبة الجانبية */
-        #ui-container {
+        /* حاوية اللعبة الكبرى: تدعم الطول بالكامل */
+        #app-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 480px; /* الحجم المثالي لشاشات الموبايل */
+            max-height: 850px;
+            background: radial-gradient(circle at center, #0f0628 0%, #030107 100%);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            width: 240px;
-            gap: 12px;
-            font-size: 15px;
+        }
+
+        /* تحسين الـ UI العلوي ليصبح فخماً ومعلقاً */
+        #navbar-ui {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 15px 10px;
+            background: linear-gradient(to bottom, rgba(15, 6, 40, 0.9) 0%, rgba(5, 2, 12, 0) 100%);
+            z-index: 5;
+        }
+
+        .ui-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            border-radius: 10px;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
             font-weight: bold;
-            background: rgba(10, 5, 25, 0.9);
-            padding: 20px;
-            border-radius: 12px;
-            border: 2px solid #a855f7;
-            box-shadow: 0 0 25px rgba(168, 85, 247, 0.3);
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        #ui-container div {
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+        .ui-card span {
+            display: block;
+            font-size: 15px;
+            margin-top: 2px;
         }
-        #ui-container div:last-child { border-bottom: none; }
 
-        /* حاوية اللعبة الرئيسية */
-        #game-container {
+        /* منطقة اللعب (الكانفاس) */
+        #canvas-container {
+            flex: 1;
             position: relative;
-            width: 950px;
-            height: 550px;
-            border: 4px solid #a855f7;
-            border-radius: 12px;
-            box-shadow: 0 0 50px rgba(168, 85, 247, 0.4);
-            overflow: hidden;
-            background-color: #020208;
+            width: 100%;
         }
 
-        #gameCanvas {
+        canvas {
             width: 100%;
             height: 100%;
             display: block;
         }
 
+        /* لوحة التحكم باللمس السفلية الأنيقة */
+        #controls-panel {
+            height: 200px;
+            background: linear-gradient(to top, rgba(10, 4, 28, 0.95) 0%, rgba(5, 2, 12, 0.6) 100%);
+            border-top: 1px solid rgba(168, 85, 247, 0.2);
+            position: relative;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 5;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* الجويستيك الافتراضي الذكي */
+        #joystick-wrapper {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            background: rgba(168, 85, 247, 0.08);
+            border: 2px solid rgba(168, 85, 247, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.2);
+        }
+
+        #joystick-stick {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #c084fc, #a855f7);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary-glow);
+            transition: transform 0.05s ease;
+            cursor: pointer;
+        }
+
+        /* زر الإطلاق العملاق الفخم للموجات الصدمية */
+        #fire-btn {
+            width: 95px;
+            height: 95px;
+            background: linear-gradient(135deg, #f43f5e, #be123c);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.4);
+            cursor: pointer;
+            active:scale: 0.92;
+            transition: 0.1s;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        #fire-btn:active {
+            transform: scale(0.92);
+            background: linear-gradient(135deg, #ff6b8b, #f43f5e);
+            box-shadow: 0 0 30px rgba(244, 63, 94, 0.8);
+        }
+
+        /* الشاشات المنبثقة المتجاوبة بالكامل */
         .overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(4, 2, 12, 0.97);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 2, 12, 0.96);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 10;
-            padding: 20px;
+            z-index: 20;
+            padding: 24px;
             box-sizing: border-box;
+            text-align: center;
         }
 
         .hidden { display: none !important; }
 
-        h1 { color: #f43f5e; margin-bottom: 5px; text-shadow: 0 0 15px rgba(244, 63, 94, 0.6); text-align: center;}
-        h2 { color: #a855f7; margin-bottom: 15px; text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); }
+        h1 { font-size: 24px; color: var(--danger); margin-bottom: 10px; text-shadow: 0 0 15px rgba(244,63,94,0.4); }
+        h2 { font-size: 20px; color: var(--primary); margin-bottom: 15px; }
 
-        button {
+        .btn-action {
             background: linear-gradient(135deg, #a855f7, #6366f1);
-            color: white;
-            border: none;
-            padding: 12px 35px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: 0.2s;
-            box-shadow: 0 4px #4f46e5;
+            color: white; border: none; padding: 14px 30px;
+            font-size: 16px; font-weight: bold; border-radius: 30px;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+            width: 80%; max-width: 280px; transition: 0.2s;
         }
-        button:hover { background: linear-gradient(135deg, #c084fc, #818cf8); transform: translateY(-2px); }
-        button:active { transform: translateY(2px); box-shadow: 0 2px #4f46e5; }
-        button:disabled { background: #374151 !important; box-shadow: 0 4px #1f2937 !important; cursor: not-allowed; color: #9ca3af !important;}
+        .btn-action:active { transform: scale(0.96); }
 
-        .shop-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .tab-btn {
-            padding: 8px 20px;
-            font-size: 15px;
-            background-color: #111827;
-            box-shadow: none;
-            border: 2px solid #374151;
-        }
-        .tab-btn.active {
-            background: #a855f7;
-            border-color: #c084fc;
-        }
-
+        /* سلة المتجر المتطورة */
         .shop-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            width: 85%;
-            margin-bottom: 20px;
-            max-height: 280px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 340px;
             overflow-y: auto;
-            padding: 5px;
+            margin-bottom: 20px;
+            padding-right: 5px;
         }
 
         .shop-item {
-            background: #090514;
-            padding: 12px;
-            border-radius: 8px;
-            border: 2px solid #374151;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            padding: 12px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .shop-item span { font-size: 13px; font-weight: bold; text-align: right;}
+        .shop-item button {
+            background: #d97706; border: none; color: white; padding: 8px 14px;
+            font-size: 12px; font-weight: bold; border-radius: 20px;
         }
 
-        .shop-item.special {
-            border-color: #ec4899;
-            background: linear-gradient(145deg, #090514, #310c22);
-        }
-
-        .shop-item span { font-size: 14px; margin-bottom: 8px; font-weight: 500; }
-        .shop-item button { padding: 6px 12px; font-size: 13px; background-color: #d97706; box-shadow: 0 3px #b45309;}
-        .shop-item.special button { background-color: #ec4899; box-shadow: 0 3px #be185d; }
-
-        /* أزرار التحكم باللمس الخاصة بالموبايل */
-        #touch-controls {
-            display: none;
+        /* تنبيهات النظام */
+        #alert-system {
             position: absolute;
-            bottom: 15px;
-            left: 0;
-            width: 100%;
-            height: 120px;
-            pointer-events: none;
-            z-index: 20;
+            top: 100px; left: 50%; transform: translateX(-50%) translateY(-20px);
+            background: rgba(244, 63, 94, 0.9); color: white;
+            padding: 10px 24px; border-radius: 20px; font-weight: bold;
+            z-index: 100; opacity: 0; transition: 0.3s ease;
+            pointer-events: none; font-size: 14px; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
         }
-        .touch-btn {
-            position: absolute;
-            width: 65px;
-            height: 65px;
-            background: rgba(168, 85, 247, 0.25);
-            border: 2px solid #a855f7;
-            border-radius: 50%;
-            color: white;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: auto;
-            touch-action: none;
-            user-select: none;
-        }
-        .touch-btn:active { background: rgba(168, 85, 247, 0.6); }
-        
-        #btn-up { bottom: 80px; left: 65px; }
-        #btn-down { bottom: 5px; left: 65px; }
-        #btn-left { bottom: 42px; left: 15px; }
-        #btn-right { bottom: 42px; left: 115px; }
-        #btn-shoot-touch { bottom: 20px; right: 25px; width: 85px; height: 85px; background: rgba(244, 63, 94, 0.3); border-color: #f43f5e; font-size: 18px; font-weight: bold;}
-        #btn-shoot-touch:active { background: rgba(244, 63, 94, 0.7); }
-        #btn-pause-touch { position: absolute; top: 10px; right: 10px; width: 45px; height: 45px; font-size: 16px; border-radius: 8px; pointer-events: auto;}
+        #alert-system.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        #alert-system.success { background: rgba(6, 182, 212, 0.9); }
 
-        #custom-alert {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: rgba(239, 68, 68, 0.95);
-            color: white;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
-            z-index: 100;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-            border: 2px solid #f87171;
-            pointer-events: none;
-            opacity: 0;
-        }
-        #custom-alert.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        #custom-alert.success { background: rgba(6, 182, 212, 0.95); border-color: #22d3ee; }
-
-        #ui-ship { color: #22d3ee; }
-        #ui-mode { color: #f43f5e; font-weight: bold; }
-        
-        .volume-control {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 20px 0;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: 1px solid #374151;
-        }
-        .volume-control input {
-            cursor: pointer;
-            accent-color: #a855f7;
-            width: 150px;
-        }
-
-        /* جعل التصميم متجاوب تماماً مع شاشات الموبايل والتابلت والكمبيوتر */
-        @media (max-width: 990px) {
-            #main-layout { flex-direction: column; align-items: center; gap: 8px; width: 100vw; height: 100vh; justify-content: center; padding: 5px;}
-            #ui-container { width: 92vw; flex-direction: row; flex-wrap: wrap; font-size: 12px; padding: 8px; gap: 6px; border-radius: 8px; justify-content: space-between;}
-            #ui-container div { border-bottom: none; border-left: 1px solid rgba(168, 85, 247, 0.2); padding: 2px 6px; }
-            #ui-container div:last-child { border-left: none; }
-            #game-container { width: 96vw; height: 62vh; border-width: 2px; }
-            #touch-controls { display: block; } /* تفعيل أزرار اللمس للموبايل فقط */
-            h1 { font-size: 20px; }
-            h2 { font-size: 18px; }
-            button { padding: 10px 20px; font-size: 15px; }
-            .shop-grid { grid-template-columns: 1fr; max-height: 160px; width: 95%; }
+        /* إخفاء لوحة اللمس على شاشات الكمبيوتر الكبيرة */
+        @media (min-width: 768px) {
+            body { background-color: #0b071e; }
+            #app-wrapper { border: 3px solid var(--primary); border-radius: 20px; box-shadow: 0 0 40px var(--primary-glow); }
         }
     </style>
 </head>
 <body>
 
-    <div id="custom-alert">تنبيه النظم الدفاعية!</div>
+    <div id="alert-system">رسالة النظام</div>
 
-    <div id="main-layout">
-        <div id="ui-container">
-            <div>المرحلة: <span id="ui-level">1</span></div>
-            <div>العملات: <span id="ui-score" style="color:#f87171;">0</span> 🔴</div>
-            <div>الدروع: <span id="ui-hp">100</span> / <span id="ui-maxhp">100</span> 🛡️</div>
-            <div>المركبة: <span id="ui-ship" style="font-size: 12px;">مركبة الاستطلاع</span></div>
-            <div id="pc-only-info">التحكم: <span id="ui-mode">الأزرار</span></div>
-            <div>المتبقي: <span id="ui-enemies">0</span> 👾</div>
+    <div id="app-wrapper">
+        <!-- واجهة البيانات العلوية الفخمة -->
+        <div id="navbar-ui">
+            <div class="ui-card">🛡️ الدروع <span id="ui-hp" style="color: #22d3ee;">100</span></div>
+            <div class="ui-card">🔴 الكوينز <span id="ui-score" style="color: #f43f5e;">0</span></div>
+            <div class="ui-card">👾 الويف <span id="ui-level" style="color: #a855f7;">1</span></div>
         </div>
 
-        <div id="game-container">
-            <canvas id="gameCanvas" width="950" height="550"></canvas>
+        <!-- ساحة المعركة الفضائية العمودية -->
+        <div id="canvas-container">
+            <canvas id="gameCanvas"></canvas>
 
-            <button id="btn-pause-touch" class="touch-btn hidden" onclick="togglePause()">⏸️</button>
-
-            <div id="touch-controls">
-                <div class="touch-btn" id="btn-up">▲</div>
-                <div class="touch-btn" id="btn-down">▼</div>
-                <div class="touch-btn" id="btn-left">◀</div>
-                <div class="touch-btn" id="btn-right">▶</div>
-                <div class="touch-btn" id="btn-shoot-touch">🔥</div>
-            </div>
-
+            <!-- شاشة البداية الاحترافية -->
             <div id="start-screen" class="overlay">
-                <h1>🚀 معركة درب التبانة: النسخة السينمائية المطلقة 🌌</h1>
-                <p style="font-size: 14px; color: #9ca3af; margin-bottom: 20px; text-align: center; max-width: 650px; line-height: 1.6;">
-                    للكمبيوتر: حرك بالأسهم أو الماوس، واضغط <span style="color:#22d3ee; font-weight:bold;">Shift</span> لقفل الماوس بالداخل والمناورة بحرية سينمائية كامة!<br>
-                    للموبايل: استخدم أزرار اللمس والجويستيك الظاهرة أسفل الشاشة للتحرك والإطلاق.
+                <div style="font-size: 50px; margin-bottom: 10px;">🛸</div>
+                <h1>🌌 حرب كواكب المجرّة 🚀</h1>
+                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 25px; line-height: 1.5; max-width: 280px;">
+                    اسحب الجويستيك الأيسر لتوجيه سفينتك بحرية كاملة بالطيران واضغط على زر الهجوم لتدمير الأعداء!
                 </p>
-                <button onclick="startGame()">تشغيل الأنظمة والإقلاع ⚡</button>
+                <button class="btn-action" onclick="startGame()">إقلاع فوري ⚡</button>
             </div>
 
-            <div id="pause-screen" class="overlay hidden">
-                <h1 style="color: #facc15; text-shadow: 0 0 15px rgba(250, 204, 21, 0.5);">⏸️ تم إيقاف الأنظمة مؤقتاً</h1>
-                <p style="color: #9ca3af;">السفينة في وضع الثبات الحالي. يمكنك ضبط الصوت هنا:</p>
-                
-                <div class="volume-control">
-                    <span>🔊 مستوى الصوت:</span>
-                    <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume(this.value)">
-                    <span id="volumePercent">50%</span>
-                </div>
-
-                <button onclick="togglePause()">متابعة المعركة ➔</button>
-            </div>
-
+            <!-- متجر الترقيات المتطور بين المراحل -->
             <div id="shop-screen" class="overlay hidden">
-                <h2>🛸 محطة الصيانة الفضائية المتطورة (المرحلة <span id="shop-level-completed">1</span>)</h2>
-                <p style="font-size: 17px; margin-bottom: 10px;">العملات المتوفرة: <span id="shop-points" style="color:#ef4444; font-weight:bold;">0</span> 🔴</p>
+                <h2>🪐 محطة الصيانة والمبيعات</h2>
+                <p style="color: #f43f5e; font-weight: bold; margin-bottom: 15px;">رصيدك الحالي: <span id="shop-points">0</span> كوينز 🔴</p>
                 
-                <div class="shop-tabs">
-                    <button class="tab-btn active" id="tab-upgrades" onclick="switchTab('upgrades')">الترقيات والأسلحة</button>
-                    <button class="tab-btn" id="tab-characters" onclick="switchTab('characters')">شراء المركبات (10 فئات) 🛸</button>
-                </div>
-                
-                <div class="shop-grid" id="grid-upgrades">
-                    <div class="shop-item"><span>تقوية صفائح الدروع (+25 HP)</span><button onclick="buyUpgrade('maxHp')">بـ <span id="cost-maxHp">15</span> 🔴</button></div>
-                    <div class="shop-item"><span>إصلاح فوري وتعبئة الدروع كاملة</span><button onclick="buyUpgrade('heal')">بـ <span id="cost-heal">10</span> 🔴</button></div>
-                    <div class="shop-item"><span>محركات دفع نفاثة إضافية للسرعة</span><button onclick="buyUpgrade('playerSpeed')">بـ <span id="cost-playerSpeed">20</span> 🔴</button></div>
-                    <div class="shop-item"><span>مسرع جزيئات لسرعة الليزر</span><button onclick="buyUpgrade('bulletSpeed')">بـ <span id="cost-bulletSpeed">15</span> 🔴</button></div>
-                    <div class="shop-item"><span>مكثف طاقة لزيادة سرعة الإطلاق</span><button onclick="buyUpgrade('fireRate')">بـ <span id="cost-fireRate">25</span> 🔴</button></div>
-                    <div class="shop-item special"><span>🔮 مدفع أشعة النجم النابض الفتاك (ضرر مضاعف ×2)</span><button id="btn-purpleWeapon" onclick="buyUpgrade('purpleWeapon')">بـ 50 🔴</button></div>
+                <div class="shop-grid">
+                    <div class="shop-item"><span>زيادة سعة الدروع الكاملة (+25 HP)</span><button onclick="buyUpgrade('maxHp', 15)">15 🔴</button></div>
+                    <div class="shop-item"><span>شحن فوري لإصلاح الدروع المكسورة</span><button onclick="buyUpgrade('heal', 10)">10 🔴</button></div>
+                    <div class="shop-item"><span>توربينات الدفع لسرعة حركة السفينة</span><button onclick="buyUpgrade('playerSpeed', 20)">20 🔴</button></div>
+                    <div class="shop-item"><span>شاحن البلازما (سرعة الليزر)</span><button onclick="buyUpgrade('bulletSpeed', 15)">15 🔴</button></div>
+                    <div class="shop-item"><span>مكثف الطاقة (سرعة إطلاق النار)</span><button onclick="buyUpgrade('fireRate', 25)">25 🔴</button></div>
+                    <div class="shop-item" style="border-color: #ec4899; background: rgba(236,72,153,0.05)"><span>🔮 مدفع أشعة البلازما الفتاك الفوقية (ضرر مضاعف)</span><button id="btn-purpleWeapon" onclick="buyUpgrade('purpleWeapon', 45)" style="background: #ec4899;">45 🔴</button></div>
                 </div>
 
-                <div class="shop-grid hidden" id="grid-characters">
-                    <div class="shop-item" style="border-color: #94a3b8;"><span>1️⃣ مركبة الاستطلاع (الافتراضية)</span><button onclick="buyShip('default', 0)">تفعيل مجاني</button></div>
-                    <div class="shop-item" style="border-color: #2563eb;"><span>2️⃣ المدمرة النجمية الزرقاء 🔵</span><button id="btn-ship-armor" onclick="buyShip('armor', 25)">شراء بـ 25</button></div>
-                    <div class="shop-item" style="border-color: #eab308;"><span>3️⃣ سفينة الإمبراطور الذهبية 👑</span><button id="btn-ship-gold" onclick="buyShip('gold', 55)">شراء بـ 55</button></div>
-                    <div class="shop-item" style="border-color: #10b981;"><span>4️⃣ الشبح الأخضر السريع 🟢</span><button id="btn-ship-greenGhost" onclick="buyShip('greenGhost', 40)">شراء بـ 40</button></div>
-                    <div class="shop-item" style="border-color: #f43f5e;"><span>5️⃣ فينيكس الحمم الحمراء 🔥</span><button id="btn-ship-redPhoenix" onclick="buyShip('redPhoenix', 65)">شراء بـ 65</button></div>
-                    <div class="shop-item" style="border-color: #d946ef;"><span>6️⃣ نيون البلازما الأرجواني 🔮</span><button id="btn-ship-purpleNeon" onclick="buyShip('purpleNeon', 50)">شراء بـ 50</button></div>
-                    <div class="shop-item" style="border-color: #06b6d4;"><span>7️⃣ صائد العواصف السيبراني ⚡</span><button id="btn-ship-cyberStorm" onclick="buyShip('cyberStorm', 60)">شراء بـ 60</button></div>
-                    <div class="shop-item" style="border-color: #f97316;"><span>8️⃣ غازية النيازك البرتقالية ☄️</span><button id="btn-ship-orangeMeteor" onclick="buyShip('orangeMeteor', 70)">شراء بـ 70</button></div>
-                    <div class="shop-item" style="border-color: #a855f7;"><span>9️⃣ مدرعة المادة المظلمة 🌌</span><button id="btn-ship-darkMatter" onclick="buyShip('darkMatter', 85)">شراء بـ 85</button></div>
-                    <div class="shop-item special" style="border-color: #ffffff; background: linear-gradient(135deg, #4c1d95, #065f46);"><span>💎 تيتان الأبدية المطلقة 👑</span><button id="btn-ship-titanGod" onclick="buyShip('titanGod', 120)">امتلاك بـ 120</button></div>
-                </div>
-                
-                <button onclick="nextLevel()" style="background: linear-gradient(135deg, #06b6d4, #0891b2); box-shadow: 0 4px #0891b2; margin-top: 5px;">الانتقال للمرحلة التالية ➔</button>
+                <button class="btn-action" onclick="nextLevel()" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">المرحلة القادمة ➔</button>
             </div>
 
+            <!-- شاشة الخسارة وإعادة المحاولة -->
             <div id="game-over-screen" class="overlay hidden">
-                <h1 style="font-size: 32px;">تحطمت سفينتك وتبخرت في الفضاء! 💥</h1>
-                <p style="font-size: 18px; margin-bottom: 20px;">المراحل المطهرة: <span id="final-level">1</span> | إجمالي العملات: <span id="final-score">0</span></p>
-                <button onclick="restartGame()">إعادة بناء المركبة والبدء مجدداً</button>
+                <div style="font-size: 50px; margin-bottom: 10px;">💥</div>
+                <h1>تدمّرت مركبتك في النجم السحيق!</h1>
+                <p style="color: #9ca3af; margin-bottom: 25px;">المرحلة التي وصلت إليها: <span id="final-level">1</span></p>
+                <button class="btn-action" onclick="restartGame()">إعادة بناء المركبة واللعب 🔄</button>
             </div>
+        </div>
+
+        <!-- أزرار التحكم السفلية المريحة للموبايل باليد الواحدة -->
+        <div id="controls-panel">
+            <!-- الجويستيك الدائري الأيسر -->
+            <div id="joystick-wrapper">
+                <div id="joystick-stick"></div>
+            </div>
+
+            <!-- زر النار الأيمن -->
+            <button id="fire-btn">🔥</button>
         </div>
     </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const gameContainer = document.getElementById('game-container');
+        const container = document.getElementById('canvas-container');
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let globalVolume = 0.5; 
-        let musicInterval; 
-
-        function updateVolume(val) {
-            globalVolume = parseFloat(val);
-            document.getElementById('volumePercent').innerText = Math.round(globalVolume * 100) + "%";
+        // ضبط أحجام الكانفاس لتملأ شاشة الموبايل تلقائياً بدون مشاكل تشويه
+        function resizeCanvas() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
         }
+        window.addEventListener('resize', resizeCanvas);
 
+        // نظام المؤثرات الصوتية والسينمائية المدمج
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {
-            if (!audioCtx || globalVolume === 0) return;
+            if (!audioCtx) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            osc.connect(gain); gain.connect(audioCtx.destination);
             let now = audioCtx.currentTime;
-            gain.gain.setValueAtTime(globalVolume, now);
 
             if (type === 'shoot') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(850, now);
-                osc.frequency.exponentialRampToValueAtTime(320, now + 0.09);
-                gain.gain.setValueAtTime(0.12 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
-                osc.start(now); osc.stop(now + 0.09);
-            } else if (type === 'purpleShoot') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(1100, now);
-                osc.frequency.linearRampToValueAtTime(250, now + 0.2);
-                gain.gain.setValueAtTime(0.15 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                osc.start(now); osc.stop(now + 0.2);
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(150, now + 0.1);
+                gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
             } else if (type === 'hit') {
-                osc.type = 'square'; osc.frequency.setValueAtTime(280, now);
-                osc.frequency.exponentialRampToValueAtTime(40, now + 0.12);
-                gain.gain.setValueAtTime(0.15 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-                osc.start(now); osc.stop(now + 0.12);
-            } else if (type === 'buySuccess') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, now);
-                osc.frequency.setValueAtTime(659.25, now + 0.08); osc.frequency.setValueAtTime(783.99, now + 0.16);
-                gain.gain.setValueAtTime(0.15 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                osc.start(now); osc.stop(now + 0.3);
-            } else if (type === 'buyFail') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(120, now); osc.frequency.setValueAtTime(80, now + 0.12);
-                gain.gain.setValueAtTime(0.2 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                osc.start(now); osc.stop(now + 0.25);
+                osc.type = 'square'; osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(50, now + 0.1);
+                gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'coin') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(587.33, now); osc.frequency.setValueAtTime(880, now + 0.08);
+                gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
             } else if (type === 'hurt') {
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(90, now); osc.frequency.linearRampToValueAtTime(30, now + 0.25);
-                gain.gain.setValueAtTime(0.3 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                osc.start(now); osc.stop(now + 0.25);
-            } else if (type === 'victoryRound') { 
-                let notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
-                notes.forEach((freq, index) => {
-                    let oscV = audioCtx.createOscillator();
-                    let gainV = audioCtx.createGain();
-                    oscV.type = 'sine';
-                    oscV.frequency.setValueAtTime(freq, now + index * 0.08);
-                    gainV.gain.setValueAtTime(0.15 * globalVolume, now + index * 0.08);
-                    gainV.gain.exponentialRampToValueAtTime(0.01, now + index * 0.08 + 0.2);
-                    oscV.connect(gainV); gainV.connect(audioCtx.destination);
-                    oscV.start(now + index * 0.08); oscV.stop(now + index * 0.08 + 0.2);
-                });
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now); osc.frequency.linearRampToValueAtTime(30, now + 0.2);
+                gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
             }
         }
 
-        let beatTrackIndex = 0;
-        function startCyberMusic() {
-            if(musicInterval) clearInterval(musicInterval);
-            let synthMelody = [146.83, 164.81, 196.00, 220.00, 146.83, 196.00, 220.00, 293.66];
-            musicInterval = setInterval(() => {
-                if(!gameActive || inShop || isPaused || globalVolume === 0) return;
-                let now = audioCtx.currentTime;
-                let osc = audioCtx.createOscillator();
-                let gain = audioCtx.createGain();
-                osc.type = (beatTrackIndex % 4 === 0) ? 'sawtooth' : 'triangle';
-                osc.frequency.setValueAtTime(synthMelody[beatTrackIndex % synthMelody.length], now);
-                gain.gain.setValueAtTime(0.05 * globalVolume, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(now); osc.stop(now + 0.25);
-                beatTrackIndex++;
-            }, 250);
+        function showAlert(text, success = false) {
+            const el = document.getElementById('alert-system');
+            el.innerText = text;
+            if(success) el.classList.add('success'); else el.classList.remove('success');
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 2000);
         }
 
-        function stopCyberMusic() { clearInterval(musicInterval); }
-
-        function showGameAlert(text, isSuccess = false) {
-            const alertBox = document.getElementById('custom-alert');
-            alertBox.innerText = text;
-            if(isSuccess) alertBox.classList.add('success'); else alertBox.classList.remove('success');
-            alertBox.classList.add('show');
-            setTimeout(() => { alertBox.classList.remove('show'); }, 2300);
-        }
-
-        let gameActive = false;
-        let inShop = false;
-        let isPaused = false; 
-        let level = 1;
-        let score = 0; 
-        let animationFrameId;
-
-        let spaceStars = [];
-        let coinsOnGround = []; 
-        let cosmicGlowPulse = 0;
-
+        // متغيرات وحالة اللعبة
+        let gameActive = false, inShop = false, level = 1, score = 0;
+        let stars = [], bullets = [], enemies = [], coins = [];
+        
         let player = {
-            x: 80, y: 250, width: 55, height: 45,
-            speed: 5, hp: 100, maxHp: 100,
-            lastShot: 0, fireRate: 380, bulletSpeed: 10,
-            hasPurpleWeapon: false,
-            currentSkin: 'default'
+            x: 200, y: 400, size: 30, speed: 6, hp: 100, maxHp: 100,
+            lastShot: 0, fireRate: 350, bulletSpeed: 12, hasPurpleWeapon: false
         };
 
-        let prices = { maxHp: 15, heal: 10, playerSpeed: 20, bulletSpeed: 15, fireRate: 25, purpleWeapon: 50 };
-        
-        let unlockedShips = { 
-            default: true, armor: false, gold: false, greenGhost: false, redPhoenix: false,
-            purpleNeon: false, cyberStorm: false, orangeMeteor: false, darkMatter: false, titanGod: false 
-        };
-        
-        const shipSkinsData = {
-            default: { name: "مركبة الاستطلاع الأفتراضية", hp: 100, speed: 5, color: '#94a3b8', fColor: '#ef4444' },
-            armor: { name: "المدمرة النجمية الزرقاء 🔵", hp: 160, speed: 6, color: '#2563eb', fColor: '#06b6d4' },
-            gold: { name: "سفينة الإمبراطور الذهبية 👑", hp: 220, speed: 8.5, color: '#eab308', fColor: '#a855f7' },
-            greenGhost: { name: "الشبح الأخضر السريع 🟢", hp: 120, speed: 10, color: '#10b981', fColor: '#34d399' },
-            redPhoenix: { name: "فينيكس الحمم الحمراء 🔥", hp: 300, speed: 5.5, color: '#f43f5e', fColor: '#f97316' },
-            purpleNeon: { name: "نيون البلازما الأرجواني 🔮", hp: 180, speed: 7.5, color: '#d946ef', fColor: '#6366f1' },
-            cyberStorm: { name: "صائد العواصف السيبراني ⚡", hp: 150, speed: 9, color: '#06b6d4', fColor: '#a855f7' },
-            orangeMeteor: { name: "غازية النيازك البرتقالية ☄️", hp: 250, speed: 6.5, color: '#f97316', fColor: '#facc15' },
-            darkMatter: { name: "مدرعة المادة المظلمة 🌌", hp: 400, speed: 4.5, color: '#6b21a8', fColor: '#ec4899' },
-            titanGod: { name: "تيتان الأبدية المطلقة 💎", hp: 500, speed: 11, color: '#ffffff', fColor: '#00ffff' }
-        };
-
-        let bullets = [];
-        let enemies = [];
+        // إدارة مدخلات التحكم (الجويستيك والأزرار والـ Keyboard كبديل للكمبيوتر)
+        let joystick = { active: false, startX: 0, startY: 0, moveX: 0, moveY: 0, maxRadius: 45 };
+        let isShooting = false;
         let keys = {};
-        let touchKeys = { up: false, down: false, left: false, right: false, shoot: false };
-        let isMouseControlActive = false; 
-        let isMouseDown = false;
 
-        document.addEventListener('pointerlockchange', () => {
-            if (document.pointerLockElement === canvas) {
-                isMouseControlActive = true;
-                showGameAlert("تم حصر الماوس داخل المعركة! 🛸", true);
-            } else {
-                if(!inShop && !isPaused) {
-                    isMouseControlActive = false;
-                    showGameAlert("العودة للتحكم بلوحة المفاتيح ⌨️");
-                }
-            }
-            updateUI();
+        // منطق الجويستيك للموبايل واللمس السلس والذكي جداً
+        const stickEl = document.getElementById('joystick-stick');
+        const wrapperEl = document.getElementById('joystick-wrapper');
+
+        wrapperEl.addEventListener('touchstart', e => {
+            const t = e.touches[0];
+            const rect = wrapperEl.getBoundingClientRect();
+            joystick.startX = rect.left + rect.width/2;
+            joystick.startY = rect.top + rect.height/2;
+            joystick.active = true;
         });
 
-        window.addEventListener('keydown', e => { 
-            keys[e.code] = true; 
-            
-            if(e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
-                if(gameActive && !inShop && !isPaused) {
-                    if(!isMouseControlActive) canvas.requestPointerLock();
-                    else document.exitPointerLock();
-                }
+        window.addEventListener('touchmove', e => {
+            if (!joystick.active) return;
+            const t = e.touches[0];
+            let dx = t.clientX - joystick.startX;
+            let dy = t.clientY - joystick.startY;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+
+            if (dist > joystick.maxRadius) {
+                dx = (dx / dist) * joystick.maxRadius;
+                dy = (dy / dist) * joystick.maxRadius;
             }
 
-            if(e.code === 'Escape') {
-                e.preventDefault();
-                if(gameActive && !inShop) togglePause();
-            }
-        });
-        window.addEventListener('keyup', e => { keys[e.code] = false; });
+            joystick.moveX = dx / joystick.maxRadius;
+            joystick.moveY = dy / joystick.maxRadius;
 
-        // ربط وتفعيل أحداث اللمس للموبايل (Touch Events)
-        function setupTouchBtn(id, keyName) {
-            const btn = document.getElementById(id);
-            if(!btn) return;
-            btn.addEventListener('touchstart', (e) => { e.preventDefault(); touchKeys[keyName] = true; });
-            btn.addEventListener('touchend', (e) => { e.preventDefault(); touchKeys[keyName] = false; });
-            btn.addEventListener('touchcancel', (e) => { e.preventDefault(); touchKeys[keyName] = false; });
-        }
-        setupTouchBtn('btn-up', 'up');
-        setupTouchBtn('btn-down', 'down');
-        setupTouchBtn('btn-left', 'left');
-        setupTouchBtn('btn-right', 'right');
-        setupTouchBtn('btn-shoot-touch', 'shoot');
-
-        canvas.addEventListener('mousemove', e => {
-            if (isMouseControlActive && gameActive && !inShop && !isPaused) {
-                player.x += e.movementX * 0.8;
-                player.y += e.movementY * 0.8;
-                // [الحرية الكاملة] تمديد الحدود لتصل لنهاية الشاشة مع ترك حد 10% أنيق بالأخر
-                player.x = Math.max(15, Math.min(canvas.width - player.width - 90, player.x));
-                player.y = Math.max(15, Math.min(canvas.height - player.height - 15, player.y));
-            }
+            stickEl.style.transform = `translate(${dx}px, ${dy}px)`;
         });
 
-        canvas.addEventListener('mousedown', e => { if(e.button === 0) isMouseDown = true; });
-        window.addEventListener('mouseup', e => { if(e.button === 0) isMouseDown = false; });
+        window.addEventListener('touchend', () => {
+            joystick.active = false;
+            joystick.moveX = 0; joystick.moveY = 0;
+            stickEl.style.transform = 'translate(0px, 0px)';
+        });
 
-        function togglePause() {
-            isPaused = !isPaused;
-            if(isPaused) {
-                if(document.pointerLockElement === canvas) document.exitPointerLock();
-                document.getElementById('pause-screen').classList.remove('hidden');
-            } else {
-                document.getElementById('pause-screen').classList.add('hidden');
-                if(isMouseControlActive) canvas.requestPointerLock();
-                gameLoop();
-            }
-        }
+        // زر النار باللمس
+        const fireBtn = document.getElementById('fire-btn');
+        fireBtn.addEventListener('touchstart', (e) => { e.preventDefault(); isShooting = true; });
+        window.addEventListener('touchend', () => { isShooting = false; });
+
+        // دعم أزرار الكيبورد للكمبيوتر (WASD / الأسهم / المسطرة للإطلاق)
+        window.addEventListener('keydown', e => { keys[e.code] = true; if(e.code === 'Space') isShooting = true; });
+        window.addEventListener('keyup', e => { keys[e.code] = false; if(e.code === 'Space') isShooting = false; });
 
         function startGame() {
             document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('btn-pause-touch').classList.remove('hidden');
+            resizeCanvas();
             gameActive = true;
-            generateSpace();
+            initStars();
             initLevel();
-            startCyberMusic(); 
-            gameLoop();
+            loop();
         }
 
-        function generateSpace() {
-            spaceStars = [];
-            for(let i=0; i<100; i++) {
-                spaceStars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    size: 1 + Math.random() * 2,
-                    alpha: 0.3 + Math.random() * 0.7,
-                    speed: 0.2 + Math.random() * 0.9
-                });
+        function initStars() {
+            stars = [];
+            for(let i=0; i<60; i++) {
+                stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random()*2+1, speed: Math.random()*2+0.5 });
             }
         }
 
         function initLevel() {
-            bullets = [];
-            enemies = [];
-            coinsOnGround = [];
-            player.x = 80;
-            player.y = canvas.height / 2 - player.height / 2;
-
-            let totalEnemies = 4 + Math.floor(level * 1.4);
-
-            for (let i = 0; i < totalEnemies; i++) {
-                let width = 45 + Math.random()*10, height = 45 + Math.random()*10;
-                let speed = 1.1 + (Math.random() * 0.5) + (level * 0.05);
-                let hp = 1 + Math.floor(level * 0.3);
-                
-                let alienNeonGlows = ['#39ff14', '#00e5ff', '#ff007f', '#bd00ff'];
-                let chosenColor = alienNeonGlows[Math.floor(Math.random() * alienNeonGlows.length)];
-                
-                let isArmored = Math.random() > 0.65; 
-                if(isArmored) { hp += 3; speed *= 0.8; }
-
+            bullets = []; enemies = []; coins = [];
+            player.x = canvas.width / 2;
+            player.y = canvas.height - 100;
+            
+            // الأعداء ينزلون من الأعلى إلى الأسفل (لعب طولي فخم)
+            let enemyCount = 5 + Math.floor(level * 1.5);
+            for(let i=0; i<enemyCount; i++) {
                 enemies.push({
-                    x: canvas.width + Math.random() * 700 + (i * 110),
-                    y: Math.random() * (canvas.height - height - 50) + 25,
-                    width: width, height: height, speed: speed,
-                    hp: hp, maxHp: hp, isArmored: isArmored, color: chosenColor,
-                    pulseSeed: Math.random() * 10, styleSeed: Math.floor(Math.random() * 3) 
+                    x: Math.random() * (canvas.width - 35) + 10,
+                    y: -Math.random() * 600 - 50,
+                    size: 25 + Math.random()*10,
+                    speed: 1.5 + (Math.random()*1.2) + (level * 0.12),
+                    hp: 1 + Math.floor(level * 0.4),
+                    color: ['#00e5ff', '#39ff14', '#ff007f', '#facc15'][Math.floor(Math.random()*4)]
                 });
             }
             updateUI();
         }
 
         function updateUI() {
-            document.getElementById('ui-level').innerText = level;
-            document.getElementById('ui-score').innerText = score;
             document.getElementById('ui-hp').innerText = Math.max(0, player.hp);
-            document.getElementById('ui-maxhp').innerText = player.maxHp;
-            document.getElementById('ui-enemies').innerText = enemies.length;
-            document.getElementById('ui-ship').innerText = shipSkinsData[player.currentSkin].name;
-            
-            let modeText = "الأزرار العادية";
-            if(isMouseControlActive) modeText = "طيران حر (ماوس)";
-            document.getElementById('ui-mode').innerText = modeText;
-            document.getElementById('ui-mode').style.color = isMouseControlActive ? "#06b6d4" : "#f43f5e";
+            document.getElementById('ui-score').innerText = score;
+            document.getElementById('ui-level').innerText = level;
         }
 
-        function gameLoop() {
-            if (!gameActive || inShop || isPaused) return;
+        function loop() {
+            if(!gameActive || inShop) return;
 
-            ctx.fillStyle = '#020106';
+            // توليد خلفية سديمية مظلمة ومتحركة فائقة الجمال بدلاً من الصورة الثابتة
+            ctx.fillStyle = '#04020a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            cosmicGlowPulse += 0.04;
 
-            drawSpaceBackground();
-            handleInput();
-            moveObjects();
-            checkCollisions();
-            drawObjects();
-
-            if (player.hp <= 0) { gameOver(); return; }
-            
-            if (enemies.length === 0 && coinsOnGround.length === 0) { 
-                playSound('victoryRound'); 
-                openShop(); 
-                return; 
-            }
-
-            animationFrameId = requestAnimationFrame(gameLoop);
-        }
-
-        function drawSpaceBackground() {
-            spaceStars.forEach(s => {
-                s.x -= s.speed;
-                if(s.x < 0) s.x = canvas.width;
-                ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
+            // تحريك النجوم في الخلفية ببطء سينمائي رائع
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            stars.forEach(s => {
+                s.y += s.speed;
+                if(s.y > canvas.height) { s.y = 0; s.x = Math.random() * canvas.width; }
                 ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
             });
+
+            handleMovement();
+            handleShooting();
+            updateEntities();
+            checkCollisions();
+            drawEntities();
+
+            if(player.hp <= 0) { gameOver(); return; }
+            if(enemies.length === 0 && coins.length === 0) { openShop(); return; }
+
+            requestAnimationFrame(loop);
         }
 
-        function handleInput() {
-            // التحرك إما بأزرار الكيبورد (للكمبيوتر) أو بأزرار اللمس (للموبايل) في نفس الوقت
-            if (!isMouseControlActive) {
-                if (keys['ArrowUp'] || keys['KeyW'] || touchKeys.up) if (player.y > 15) player.y -= player.speed;
-                if (keys['ArrowDown'] || keys['KeyS'] || touchKeys.down) if (player.y < canvas.height - player.height - 15) player.y += player.speed;
-                if (keys['ArrowLeft'] || keys['KeyA'] || touchKeys.left) if (player.x > 15) player.x -= player.speed;
-                if (keys['ArrowRight'] || keys['KeyD'] || touchKeys.right) if (player.x < canvas.width - player.width - 90) player.x += player.speed;
+        function handleMovement() {
+            // حركة الجويستيك (موبايل) بـ "الحرية المطلقة والكاملة في الطيران" مع حواف أمان 10 بكسل
+            if (joystick.active) {
+                player.x += joystick.moveX * player.speed;
+                player.y += joystick.moveY * player.speed;
             }
+            
+            // حركة الكيبورد (كمبيوتر)
+            if (keys['ArrowUp'] || keys['KeyW']) player.y -= player.speed;
+            if (keys['ArrowDown'] || keys['KeyS']) player.y += player.speed;
+            if (keys['ArrowLeft'] || keys['KeyA']) player.x -= player.speed;
+            if (keys['ArrowRight'] || keys['KeyD']) player.x += player.speed;
 
-            // إطلاق النار (كيبورد، ماوس، أو لمس)
-            if (isMouseDown || keys['Space'] || touchKeys.shoot) {
+            // حصر الطائرة داخل الشاشة بدقة مذهلة لتفادي الخروج عن الرؤية
+            player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
+            player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
+        }
+
+        function handleShooting() {
+            if (isShooting) {
                 let now = Date.now();
                 if (now - player.lastShot > player.fireRate) {
                     bullets.push({
-                        x: player.x + player.width - 5,
-                        y: player.y + player.height * 0.5,
-                        width: player.hasPurpleWeapon ? 26 : 14,
-                        height: player.hasPurpleWeapon ? 14 : 6,
+                        x: player.x,
+                        y: player.y - player.size,
+                        w: player.hasPurpleWeapon ? 8 : 4,
+                        h: player.hasPurpleWeapon ? 22 : 14,
                         speed: player.bulletSpeed,
-                        damage: player.hasPurpleWeapon ? 2 : 1,
-                        color: player.hasPurpleWeapon ? '#d946ef' : '#22d3ee'
+                        dmg: player.hasPurpleWeapon ? 2 : 1,
+                        color: player.hasPurpleWeapon ? '#ec4899' : '#00e5ff'
                     });
-                    playSound(player.hasPurpleWeapon ? 'purpleShoot' : 'shoot');
+                    playSound('shoot');
                     player.lastShot = now;
                 }
             }
         }
 
-        function moveObjects() {
-            bullets.forEach((bullet, index) => {
-                bullet.x += bullet.speed;
-                if (bullet.x > canvas.width) bullets.splice(index, 1);
+        function updateEntities() {
+            // الرصاص يطير للأعلى
+            bullets.forEach((b, i) => {
+                b.y -= b.speed;
+                if(b.y < -20) bullets.splice(i, 1);
             });
 
-            enemies.forEach((enemy) => {
-                enemy.x -= enemy.speed;
-                enemy.pulseSeed += 0.07;
-                if (enemy.x + enemy.width < 0) {
-                    enemy.x = canvas.width + Math.random() * 300;
-                    enemy.y = Math.random() * (canvas.height - enemy.height - 50) + 25;
+            // الأعداء ينزلون للأسفل
+            enemies.forEach((e) => {
+                e.y += e.speed;
+                if(e.y > canvas.height + 40) {
+                    e.y = -50; e.x = Math.random() * (canvas.width - 30) + 15;
                 }
             });
 
-            coinsOnGround.forEach((coin, index) => {
-                coin.x -= 0.6;
-                if(coin.x + 15 < 0) coinsOnGround.splice(index, 1);
+            // الكوينز تنجذب تلقائياً نحو اللاعب من مسافة قريبة لمزيد من المتعة والإثارة
+            coins.forEach((c, i) => {
+                let dx = player.x - c.x;
+                let dy = player.y - c.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if(dist < 120) { 
+                    c.x += (dx/dist) * 5;
+                    c.y += (dy/dist) * 5;
+                } else {
+                    c.y += 1;
+                }
+                if(c.y > canvas.height + 20) coins.splice(i, 1);
             });
         }
 
         function checkCollisions() {
-            bullets.forEach((bullet, bIndex) => {
-                enemies.forEach((enemy, eIndex) => {
-                    if (bullet.x < enemy.x + enemy.width && bullet.x + bullet.width > enemy.x &&
-                        bullet.y < enemy.y + enemy.height && bullet.y + bullet.height > enemy.y) {
-                        
-                        bullets.splice(bIndex, 1);
-                        enemy.hp -= bullet.damage;
+            // رصاص ضد أعداء
+            bullets.forEach((b, bi) => {
+                enemies.forEach((e, ei) => {
+                    let dx = b.x - e.x;
+                    let dy = b.y - e.y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if(dist < e.size) {
+                        bullets.splice(bi, 1);
+                        e.hp -= b.dmg;
                         playSound('hit');
-                        
-                        if(enemy.hp <= 0) {
-                            coinsOnGround.push({ x: enemy.x + enemy.width/2, y: enemy.y + enemy.height/2, r: 7 });
-                            enemies.splice(eIndex, 1);
+                        if(e.hp <= 0) {
+                            coins.push({ x: e.x, y: e.y, size: 8 });
+                            enemies.splice(ei, 1);
+                            score += 2;
                             updateUI();
                         }
                     }
                 });
             });
 
-            coinsOnGround.forEach((coin, cIndex) => {
-                if (player.x < coin.x + 12 && player.x + player.width > coin.x - 12 &&
-                    player.y < coin.y + 12 && player.y + player.height > coin.y - 12) {
-                    coinsOnGround.splice(cIndex, 1);
-                    score += 1;
-                    playSound('buySuccess');
+            // لاعب يلمس الكوينز
+            coins.forEach((c, ci) => {
+                let dx = player.x - c.x;
+                let dy = player.y - c.y;
+                if(Math.sqrt(dx*dx + dy*dy) < player.size + c.size) {
+                    coins.splice(ci, 1);
+                    score += 3;
+                    playSound('coin');
                     updateUI();
                 }
             });
 
-            enemies.forEach((enemy, eIndex) => {
-                if (player.x < enemy.x + enemy.width && player.x + player.width > enemy.x &&
-                    player.y < enemy.y + enemy.height && player.y + player.height > enemy.y) {
-                    player.hp -= enemy.isArmored ? 30 : 18;
-                    enemies.splice(eIndex, 1);
+            // تصادم سفينة اللاعب مع الوحوش مباشرة
+            enemies.forEach((e, ei) => {
+                let dx = player.x - e.x;
+                let dy = player.y - e.y;
+                if(Math.sqrt(dx*dx + dy*dy) < player.size + e.size) {
+                    enemies.splice(ei, 1);
+                    player.hp -= 20;
                     playSound('hurt');
                     updateUI();
                 }
             });
         }
 
-        function drawPlayer() {
+        function drawEntities() {
+            // 1. رسم سفينة الفضاء الأنيقة ببلازما خلفية متوهجة
             ctx.save();
-            ctx.translate(player.x, player.y);
-
-            let currentConfig = shipSkinsData[player.currentSkin];
-            let primaryColor = currentConfig.color; 
-            let thrusterColor = currentConfig.fColor;
-
-            if(player.currentSkin === 'titanGod') {
-                ctx.shadowBlur = 22; ctx.shadowColor = '#00ffff';
-            } else {
-                ctx.shadowBlur = 10; ctx.shadowColor = primaryColor;
-            }
-
-            ctx.fillStyle = thrusterColor;
-            let fireLength = 15 + Math.random() * 12;
-            ctx.beginPath(); ctx.moveTo(-2, player.height * 0.4); ctx.lineTo(-2 - fireLength, player.height * 0.5); ctx.lineTo(-2, player.height * 0.6); ctx.fill();
-
-            ctx.fillStyle = primaryColor;
-            ctx.fillRect(5, -2, 8, player.height + 4);
-            ctx.beginPath(); ctx.moveTo(12, -6); ctx.lineTo(24, player.height*0.2); ctx.lineTo(0, player.height*0.2); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(12, player.height + 6); ctx.lineTo(24, player.height*0.8); ctx.lineTo(0, player.height*0.8); ctx.fill();
-
-            ctx.beginPath(); ctx.moveTo(0, player.height * 0.2); ctx.lineTo(player.width - 12, player.height * 0.1);
-            ctx.lineTo(player.width, player.height * 0.5); ctx.lineTo(player.width - 12, player.height * 0.9);
-            ctx.lineTo(0, player.height * 0.8); ctx.closePath(); ctx.fill();
-
-            ctx.fillStyle = '#38bdf8';
-            ctx.beginPath(); ctx.arc(player.width * 0.6, player.height * 0.5, 7, 0, Math.PI*2); ctx.fill();
-
-            ctx.fillStyle = player.hasPurpleWeapon ? '#d946ef' : '#475569';
-            ctx.fillRect(player.width - 6, player.height * 0.44, 10, 6);
-            ctx.restore();
-        }
-
-        function drawAlien(enemy) {
-            ctx.save();
-            ctx.translate(enemy.x, enemy.y);
-            
-            let sizePulse = Math.sin(enemy.pulseSeed) * 3;
-            ctx.shadowBlur = 15 + Math.sin(enemy.pulseSeed) * 5;
-            ctx.shadowColor = enemy.color;
-
-            ctx.strokeStyle = enemy.color;
-            ctx.lineWidth = 3;
+            ctx.shadowBlur = 15; ctx.shadowColor = '#a855f7';
+            ctx.fillStyle = '#a855f7';
             ctx.beginPath();
-            ctx.moveTo(enemy.width * 0.5, enemy.height * 0.5);
-            ctx.lineTo(-10 + sizePulse, enemy.height * 0.2);
-            ctx.moveTo(enemy.width * 0.5, enemy.height * 0.5);
-            ctx.lineTo(-10 - sizePulse, enemy.height * 0.8);
-            ctx.stroke();
-
-            ctx.fillStyle = 'rgba(25, 15, 45, 0.85)';
-            ctx.strokeStyle = enemy.color;
-            ctx.lineWidth = 2;
+            ctx.moveTo(player.x, player.y - player.size);
+            ctx.lineTo(player.x - player.size, player.y + player.size * 0.7);
+            ctx.lineTo(player.x, player.y + player.size * 0.3);
+            ctx.lineTo(player.x + player.size, player.y + player.size * 0.7);
+            ctx.closePath(); ctx.fill();
             
-            ctx.beginPath();
-            if(enemy.styleSeed === 0) {
-                ctx.moveTo(enemy.width * 0.5, 0); ctx.lineTo(enemy.width, enemy.height * 0.5);
-                ctx.lineTo(enemy.width * 0.5, enemy.height); ctx.lineTo(0, enemy.height * 0.5);
-            } else if(enemy.styleSeed === 1) {
-                ctx.moveTo(0, enemy.height*0.2); ctx.lineTo(enemy.width*0.4, 0);
-                ctx.lineTo(enemy.width, enemy.height*0.5); ctx.lineTo(enemy.width*0.4, enemy.height);
-                ctx.lineTo(0, enemy.height*0.8);
-            } else {
-                ctx.roundRect(0, 5, enemy.width, enemy.height - 10, 12);
-            }
-            ctx.closePath(); ctx.fill(); ctx.stroke();
-
-            if(enemy.isArmored) {
-                ctx.fillStyle = '#475569'; ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
-                ctx.fillRect(enemy.width * 0.2, 0, enemy.width * 0.6, 8);
-                ctx.strokeRect(enemy.width * 0.2, 0, enemy.width * 0.6, 8);
-            }
-
-            let gradient = ctx.createRadialGradient(enemy.width*0.5, enemy.height*0.5, 2, enemy.width*0.5, enemy.height*0.5, 14);
-            gradient.addColorStop(0, '#ffffff'); gradient.addColorStop(0.4, enemy.color); gradient.addColorStop(1, 'transparent');
-            ctx.fillStyle = gradient; ctx.beginPath(); ctx.arc(enemy.width * 0.5, enemy.height * 0.5, 15 + sizePulse*0.5, 0, Math.PI * 2); ctx.fill();
+            // قمرة القيادة النيونية المتوهجة باللون اللبني المذهل
+            ctx.fillStyle = '#22d3ee';
+            ctx.beginPath(); ctx.arc(player.x, player.y - player.size * 0.2, 5, 0, Math.PI*2); ctx.fill();
             ctx.restore();
 
-            if(enemy.maxHp > 1) {
-                let healthPercent = enemy.hp / enemy.maxHp;
-                ctx.fillStyle = '#111827'; ctx.fillRect(enemy.x, enemy.y - 12, enemy.width, 5);
-                ctx.fillStyle = enemy.isArmored ? '#3b82f6' : '#ef4444';
-                ctx.fillRect(enemy.x, enemy.y - 12, enemy.width * healthPercent, 5);
-            }
-        }
+            // 2. رسم طلقات الليزر والنبضات السيبرانية للمدافع
+            bullets.forEach(b => {
+                ctx.save(); ctx.fillStyle = b.color; ctx.shadowBlur = 12; ctx.shadowColor = b.color;
+                ctx.fillRect(b.x - b.w/2, b.y, b.w, b.h); ctx.restore();
+            });
 
-        function drawObjects() {
-            coinsOnGround.forEach(coin => {
-                ctx.save(); ctx.shadowBlur = 12; ctx.shadowColor = '#ef4444';
-                ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
-                ctx.beginPath(); ctx.arc(coin.x, coin.y, coin.r + 4, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#ef4444';
-                ctx.beginPath(); ctx.arc(coin.x, coin.y, coin.r, 0, Math.PI*2); ctx.fill();
+            // 3. رسم وحوش ومركبات الأعداء الفضائيين الأشرار
+            enemies.forEach(e => {
+                ctx.save(); ctx.shadowBlur = 15; ctx.shadowColor = e.color;
+                ctx.fillStyle = 'rgba(15, 6, 35, 0.9)'; ctx.strokeStyle = e.color; ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, e.size, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                
+                // إضافة لمسة عين شريرة متوهجة بالمنتصف لكل وحش
+                ctx.fillStyle = e.color;
+                ctx.beginPath(); ctx.arc(e.x, e.y, 6, 0, Math.PI*2); ctx.fill();
                 ctx.restore();
             });
 
-            drawPlayer();
-
-            bullets.forEach(bullet => {
-                ctx.save(); ctx.fillStyle = bullet.color; ctx.shadowBlur = 10; ctx.shadowColor = bullet.color;
-                ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height); ctx.restore();
+            // 4. رسم نقاط الكوينز الحمراء المشعة المتساقطة
+            coins.forEach(c => {
+                ctx.save(); ctx.shadowBlur = 10; ctx.shadowColor = '#f43f5e';
+                ctx.fillStyle = '#f43f5e';
+                ctx.beginPath(); ctx.arc(c.x, c.y, c.size, 0, Math.PI*2); ctx.fill();
+                ctx.restore();
             });
-
-            enemies.forEach(enemy => { drawAlien(enemy); });
-        }
-
-        function switchTab(tab) {
-            document.getElementById('tab-upgrades').classList.remove('active');
-            document.getElementById('tab-characters').classList.remove('active');
-            document.getElementById('grid-upgrades').classList.add('hidden');
-            document.getElementById('grid-characters').classList.add('hidden');
-
-            if(tab === 'upgrades') {
-                document.getElementById('tab-upgrades').classList.add('active');
-                document.getElementById('grid-upgrades').classList.remove('hidden');
-            } else {
-                document.getElementById('tab-characters').classList.add('active');
-                document.getElementById('grid-characters').classList.remove('hidden');
-            }
         }
 
         function openShop() {
             inShop = true;
-            if (document.pointerLockElement === canvas) document.exitPointerLock(); 
-            document.getElementById('shop-level-completed').innerText = level;
             document.getElementById('shop-points').innerText = score;
-            
             if(player.hasPurpleWeapon) {
-                let btn = document.getElementById('btn-purpleWeapon');
-                btn.innerText = "ممتلك ✓"; btn.disabled = true;
+                document.getElementById('btn-purpleWeapon').innerText = "ممتلك ✓";
+                document.getElementById('btn-purpleWeapon').disabled = true;
             }
-
-            for (let skinKey in unlockedShips) {
-                if (skinKey === 'default') continue;
-                let btnEl = document.getElementById(`btn-ship-${skinKey}`);
-                if (btnEl && unlockedShips[skinKey]) {
-                    btnEl.innerText = (player.currentSkin === skinKey) ? "نشطة حالياً ✓" : "تفعيل الفئة";
-                    btnEl.style.backgroundColor = (player.currentSkin === skinKey) ? "#10b981" : "#4b5563";
-                }
-            }
-
             document.getElementById('shop-screen').classList.remove('hidden');
         }
 
-        function buyUpgrade(type) {
-            let cost = prices[type];
-            if (score >= cost) {
-                if (type === 'maxHp') {
-                    player.maxHp += 25; player.hp += 25; score -= cost;
-                    prices.maxHp = Math.floor(prices.maxHp * 1.35);
-                } else if (type === 'heal') {
-                    if(player.hp === player.maxHp) { playSound('buyFail'); showGameAlert("طاقة دروع مركبتك ممتلئة بالفعل!"); return; }
-                    player.hp = player.maxHp; score -= cost;
-                } else if (type === 'playerSpeed') {
-                    player.speed += 1; score -= cost;
-                    prices.playerSpeed = Math.floor(prices.playerSpeed * 1.4);
-                } else if (type === 'bulletSpeed') {
-                    player.bulletSpeed += 2; score -= cost;
-                    prices.bulletSpeed = Math.floor(prices.bulletSpeed * 1.3);
-                } else if (type === 'fireRate') {
-                    if(player.fireRate <= 110) { playSound('buyFail'); showGameAlert("وصلت للحد الأقصى لسرعة السلاح!"); return; }
-                    player.fireRate -= 45; score -= cost;
-                    prices.fireRate = Math.floor(prices.fireRate * 1.45);
-                } else if (type === 'purpleWeapon') {
-                    player.hasPurpleWeapon = true; score -= cost;
-                    document.getElementById('btn-purpleWeapon').disabled = true;
-                }
-                
-                playSound('buySuccess');
-                showGameAlert("تم تركيب الترقية بنجاح! ⚙️", true);
-                document.getElementById('shop-points').innerText = score;
-                if(type !== 'purpleWeapon') document.getElementById(`cost-${type}`).innerText = prices[type];
-                updateUI();
-            } else {
-                playSound('buyFail'); showGameAlert("العملات غير كافية! 🔴");
-            }
-        }
-
-        function buyShip(skin, cost) {
-            if(unlockedShips[skin]) {
-                player.currentSkin = skin;
-                let cfg = shipSkinsData[skin];
-                player.maxHp = Math.max(player.maxHp, cfg.hp);
-                player.hp = player.maxHp;
-                player.speed = Math.max(player.speed, cfg.speed);
-                
-                playSound('buySuccess');
-                showGameAlert(`تم تفعيل وتجهيز ${cfg.name}! 🛸`, true);
-                openShop(); 
-                updateUI();
-                return;
-            }
-
+        function buyUpgrade(type, cost) {
             if(score >= cost) {
-                score -= cost; 
-                unlockedShips[skin] = true; 
-                player.currentSkin = skin;
+                if(type === 'maxHp') { player.maxHp += 25; player.hp += 25; }
+                else if(type === 'heal') { player.hp = player.maxHp; }
+                else if(type === 'playerSpeed') { player.speed += 1.5; }
+                else if(type === 'bulletSpeed') { player.bulletSpeed += 3; }
+                else if(type === 'fireRate') { player.fireRate = Math.max(120, player.fireRate - 50); }
+                else if(type === 'purpleWeapon') { player.hasPurpleWeapon = true; }
                 
-                let cfg = shipSkinsData[skin];
-                player.maxHp = Math.max(player.maxHp, cfg.hp);
-                player.hp = player.maxHp;
-                player.speed = Math.max(player.speed, cfg.speed);
-
-                playSound('buySuccess'); 
-                showGameAlert(`تم امتلاك وتجهيز المركبة بنجاح! 🚀`, true);
-                document.getElementById('shop-points').innerText = score;
-                openShop();
-                updateUI();
+                score -= cost;
+                playSound('coin');
+                showAlert("تمت عملية الشراء بنجاح! 🛠️", true);
+                openShop(); updateUI();
             } else {
-                playSound('buyFail'); showGameAlert("العملات المتوفرة لديك لا تكفي!");
+                playSound('hurt'); showAlert("الكوينز المتاحة غير كافية! 🔴");
             }
         }
 
         function nextLevel() {
             level++; inShop = false;
             document.getElementById('shop-screen').classList.add('hidden');
-            initLevel();
-            if(isMouseControlActive) canvas.requestPointerLock();
-            gameLoop();
+            initLevel(); loop();
         }
 
         function gameOver() {
             gameActive = false;
-            stopCyberMusic();
-            if (document.pointerLockElement === canvas) document.exitPointerLock();
-            cancelAnimationFrame(animationFrameId);
             document.getElementById('final-level').innerText = level;
-            document.getElementById('final-score').innerText = score;
             document.getElementById('game-over-screen').classList.remove('hidden');
         }
 
         function restartGame() {
-            level = 1; score = 0; isMouseControlActive = false; isPaused = false;
-            player.maxHp = 100; player.hp = 100; player.fireRate = 380; player.bulletSpeed = 10; player.speed = 5;
-            player.hasPurpleWeapon = false; player.currentSkin = 'default';
-            prices = { maxHp: 15, heal: 10, playerSpeed: 20, bulletSpeed: 15, fireRate: 25, purpleWeapon: 50 };
-            
-            unlockedShips = { 
-                default: true, armor: false, gold: false, greenGhost: false, redPhoenix: false,
-                purpleNeon: false, cyberStorm: false, orangeMeteor: false, darkMatter: false, titanGod: false 
-            };
-            
+            level = 1; score = 0;
+            player.maxHp = 100; player.hp = 100; player.fireRate = 350; player.bulletSpeed = 12; player.speed = 6;
+            player.hasPurpleWeapon = false;
             document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('btn-purpleWeapon').innerText = "45 🔴";
             document.getElementById('btn-purpleWeapon').disabled = false;
-            document.getElementById('btn-purpleWeapon').innerText = "شراء بـ 50 عملة";
-
-            for(let key in prices) {
-                let el = document.getElementById(`cost-${key}`); if(el) el.innerText = prices[key];
-            }
-
-            gameActive = true; generateSpace(); initLevel(); startCyberMusic(); gameLoop();
+            startGame();
         }
     </script>
 </body>
